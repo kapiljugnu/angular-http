@@ -4,7 +4,7 @@ import { Place } from '../place.model';
 import { PlacesComponent } from '../places.component';
 import { PlacesContainerComponent } from '../places-container/places-container.component';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs';
+import { map, single } from 'rxjs';
 
 @Component({
   selector: 'app-available-places',
@@ -16,6 +16,7 @@ import { map } from 'rxjs';
 export class AvailablePlacesComponent implements OnInit {
   places = signal<Place[] | undefined>(undefined);
   isFetching = signal(false);
+  error = signal('')
   private httpClient = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
 
@@ -27,6 +28,11 @@ export class AvailablePlacesComponent implements OnInit {
       .subscribe({
         next: (places) => {
           this.places.set(places)
+        },
+        error: (e) => {
+          console.log(e);
+          this.error.set('Something went wrong fetching the available places. Please try again later.')
+          this.isFetching.set(false);
         },
         complete: () => {
           this.isFetching.set(false)
